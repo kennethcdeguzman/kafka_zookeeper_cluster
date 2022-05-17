@@ -1,0 +1,96 @@
+version: "3"
+services:
+  zookeeper_1:
+    build: ./zookeeper
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+    networks:
+      - network_zookeeper
+    labels:
+      - zookeeper
+    expose:
+      - "2281"
+      - "2888"
+      - "3888"
+    environment:
+      - ZK_MYID=1
+
+  kafka_1:
+    build: ./kafka
+    container_name: kafka_1
+    hostname: kafka_1
+    ports:
+      - 9101:9101
+    networks:
+      - network_kafka
+    labels:
+      - kafka
+    expose:
+      - "9101"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_EXTERNAL_PORT=9101
+      - KAFKA_EXTERNAL_HOST=localhost
+      - KAFKA_ZOOKEEPER_CONNECT=172.17.0.1:2181
+    depends_on:
+      - zookeeper_1
+
+  kafka_2:
+    build: ./kafka
+    container_name: kafka_2
+    hostname: kafka_2
+    ports:
+      - 9102:9102
+    networks:
+      - network_kafka
+    labels:
+      - kafka
+    expose:
+      - "9102"
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_EXTERNAL_PORT=9102
+      - KAFKA_EXTERNAL_HOST=localhost
+      - KAFKA_ZOOKEEPER_CONNECT=172.17.0.1:2181
+    depends_on:
+      - zookeeper_1
+
+  kafka_3:
+    build: ./kafka
+    container_name: kafka_3
+    hostname: kafka_3
+    ports:
+      - 9103:9103
+    networks:
+      - network_kafka
+    labels:
+      - kafka
+    expose:
+      - "9103"
+    environment:
+      - KAFKA_BROKER_ID=3
+      - KAFKA_EXTERNAL_PORT=9103
+      - KAFKA_EXTERNAL_HOST=localhost
+      - KAFKA_ZOOKEEPER_CONNECT=172.17.0.1:2181
+    depends_on:
+      - zookeeper_1
+
+networks:
+  network_kafka:
+    name: network_kafka
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.50.0/24
+          gateway: 192.168.50.1
+  network_zookeeper:
+    name: network_zookeeper
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.51.0/24
+          gateway: 192.168.51.1
